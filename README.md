@@ -77,7 +77,55 @@ from individuals" (page 18 diagram); what about corp buying from corp? Likely th
 ANATOMY OF PAPER:
 
 METHODS:
-Data Sources, Combo, Tables
+
+Data processing:
+- Sources of data (appending, some instances of missing parcel records); DeKalb excluded
+- Data cleaning
+- Geocoding to determine NSA
+- Merging data
+- Number of parcels, number of sales
+- LUC = 101, Saveval = 0
+
+Analysis:
+- Dropping ADUs
+- Drop parcels and sales where govt inst or banks are involved
+- Identifying same owners for parcel and sales data
+- Determine ownership scale of the owner of each parcel during that year on the neighborhood, city, and county level
+    - Change in ownership by year (total prop owned by corp by size, ind for each year chart), graph showing slope of each on one
+    - Top owners in Fulton (could potentially show where they own most parcels by neighborhood); take year where owner had most?
+    - Top owners in ATL
+    - Top owner concentrations in neighborhoods (careful of small neighorhoods)
+    - Distribution of ownership size (plot) e.g. percent of owners with n properties - for 2022? Whatever year has highest; could agg over years, only select for corp?
+    - Bins of ownership size by year (chart) - boxplot?
+    - DURATION OF OWNERSHIP BY type??? HOW - have a flag for small, medium, and large investor; sum years held where flag is set true for each type (what about corp to corp sales tho); or keep counting until owner changes and agg based on owner size bin (omg bruh); held is a meaningless metric bc we are taking a sample?
+- Determine scale of buying and selling activty for each buyer and seller in that year (some important data notes from sales) - TODO
+    - Change in percent of transcations by corp size and overall (also break down for buying and selling)
+    - Top buyers and sellers in Fulton, ATL, neighborhoods
+    - Distribution of activity e.g. what percent of owners bought n properties
+    - Bins of activity by year (chart) - boxplot
+- Sale classification matrix
+    - Distribution of sales
+    - Distribution of sales by neighborhoods e.g. which properties had a lot of corps buying or selling in a year
+- Agg of sales and purchases
+    - By neighborhood for each year and agg
+    - Significance test of diff agg between purchase and sell power of corp vs ind, per neighborhood
+    - dist of salesprice - fmv paid by owner size
+- Holding activity
+    - By neighborhood
+- Total measure (just agg)
+    - broken down by only those sold which were bought during period, or all sales (includes purchasing before period)
+    - broken down by small, medium, large investor? in city or neighborhood (both lol)?
+- Total normalized measure (divided by median sale price)
+    - 
+- Burden measure (divided by yearly median income)
+- How long until renting would overtake buying and selling?
+- Neighborhood characteristics linked to equity loss (lol)
+- neighborhood transcation metrics, number of transcations, number of unique as a percent of total, etc
+
+- I don't believe you are tracking buying then selling, rather just aggreggating any corp purchase from ind, and corp sale to ind; what impact might this have- for instance, corps may have bought a lot of properties before the study period. Then they go to sell during the study period. Sales will appear very high whereas buying activity only has the chance to occur during the study period without being impacted by prior circumstances. Calculating avg difference in price - fmv works since it normalizes for count, but the total sums could be skewed along with other factors may have not considered. (we basically account for this by doing this year by year concentration metrics)
+
+- We are summing rental income from: "While properties are held by corporations as rentals; for those purchased from individuals" (page 18 diagram); what about corp buying from corp? Likely those properties are still rentals. TODO - corp buying from corp should be included
+
 
 RESULTS:
 - want to understand corporate purachsing overall in Atlanta and compared to Fulton
@@ -88,3 +136,9 @@ RESULTS:
 - want to understand the major factors of equity loss
 - simulate how long until renting would become more important than buying and selling (for policy implications)
 - 
+
+Notes:
+- We are counting all sales to corps as rental properties. People might have an issue with this. Although I think its good enough. I guess flipping activity would be the main issue.
+- The length of the study period impacts the ratio of importance of buying, holding, and selling. If the study period is very long, holding will become larger and larger. This needs to be discussed.
+- Limitation of using neighborhoods versus radii
+- For rental income, do we want to include the full year when the property was bought/sold? So if the property was bought Dec 2020, are our calculations including 2020 rental income? Decision: we are not accounting for this as it should be normally distributed?
