@@ -1,6 +1,17 @@
 equity-extraction/
 data/
-output/
+output/owner_scale.csv
+output/parcels_geo.csv
+output/digest_full_final.parquet
+output/digest_full_clean.parquet
+output/digest_full.parquet
+output/sales_full_final.parquet
+output/sales_full_valid.parquet
+output/sales_full.parquet
+output/sales_full_clean.parquet
+output/sales_for_stat.csv
+output/sales_for_stats_filled.csv
+output/sales_for_stats_dropped.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
