@@ -12,6 +12,8 @@ output/sales_full_clean.parquet
 output/sales_for_stat.csv
 output/sales_for_stats_filled.csv
 output/sales_for_stats_dropped.csv
+fcs.ipynb
+misc/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
