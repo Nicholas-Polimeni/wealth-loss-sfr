@@ -176,8 +176,8 @@ def map(
         ax = plt.gca()
 
     norm = None
-    # if log:
-    #    norm = mcolors.LogNorm(vmin=df[color].min(), vmax=df[color].max())
+    if log:
+        norm = mcolors.LogNorm(vmin=df[color].min(), vmax=df[color].max())
 
     if log:
         df[f"log_{color}"] = np.log(df[color])
@@ -204,7 +204,10 @@ def map(
     if log:
 
         def log_tick_formatter(val, pos=None):
-            return str(round(np.exp(val), 3))
+            if color == "total_loss_adj":
+                return str(f"{round((round(np.exp(val), 3) / 1000000), 3)}M")
+            else:
+                return str(round(np.exp(val), 3))
 
         # can't have 0s
         cbar = ax.get_figure().colorbar(mappable=ax.collections[0], ax=ax, shrink=0.8)
@@ -216,7 +219,9 @@ def map(
         cbar.ax.yaxis.set_major_formatter(ticker.FuncFormatter(format_func))
 
     color = color.replace("log_", "")
-    highlight_nbhds = pd.DataFrame(df.sort_values(by=color, ascending=False).head(3)["neighborhood"])
+    highlight_nbhds = pd.DataFrame(
+        df.sort_values(by=color, ascending=False).head(3)["neighborhood"]
+    )
 
     if highlight:
         h = gpd.GeoDataFrame(highlight_nbhds.merge(nbhd_df, on="neighborhood"))
@@ -245,9 +250,7 @@ def map(
         # Add custom annotations for neighborhoods
         y_offset = 0.05
         ax.annotate(
-            text=f"Top 3 Neighborhoods ({color.replace('_', " ").replace(
-                " adj", ""
-            ).replace("equity burden", "equity loss share").replace("Percent", "proportion")})",
+            text=f"Top 3 Neighborhoods",
             xy=(0.5, -0.05),
             xycoords="axes fraction",
             fontsize=12,
@@ -317,3 +320,122 @@ def map(
         #         va="center",
         #     )
         #     ax.add_artist(item)
+
+
+def map_select(
+    df: gpd.GeoDataFrame,
+    color: str,
+    title: str,
+    nbhd_df: gpd.GeoDataFrame = None,
+    ax: plt.Axes = None,
+    highlight: list[str] = None,
+    format_func: callable = None,
+    log: bool = False,
+    legend: bool = False,
+) -> px.choropleth:
+    """
+    Plots a choropleth map
+    """
+    df = df.copy(deep=True)
+    df = df[df[color] != 0]
+    if not ax:
+        ax = plt.gca()
+
+    norm = None
+    # if log:
+    #    norm = mcolors.LogNorm(vmin=df[color].min(), vmax=df[color].max())
+
+    if log:
+        df[f"log_{color}"] = np.log(df[color])
+        color = f"log_{color}"
+
+    # display(df[color])
+    gpd.GeoDataFrame(df).plot(
+        ax=ax,
+        column=color,
+        legend=False,
+        cmap="coolwarm",
+        edgecolor="black",
+        linewidth=0.75,
+    )
+    nbhd_df.plot(
+        ax=ax, facecolor="none", legend=False, edgecolor="black", linewidth=0.75
+    )
+
+    ax.set_axis_off()
+    ax.set_title(title, fontweight="bold", fontsize=FONTSIZE)
+    ax.title.set_position([0.58, 1.05])
+    ax.ticklabel_format(style="plain")
+
+    if log:
+
+        def log_tick_formatter(val, pos=None):
+            return str(round(np.exp(val), 3))
+
+        # can't have 0s
+        cbar = ax.get_figure().colorbar(mappable=ax.collections[0], ax=ax, shrink=0.8)
+        cbar.ax.yaxis.set_major_formatter(ticker.FuncFormatter(log_tick_formatter))
+    else:
+        cbar = ax.get_figure().colorbar(ax.collections[0], ax=ax, shrink=0.8)
+
+    if format_func:
+        cbar.ax.yaxis.set_major_formatter(ticker.FuncFormatter(format_func))
+
+    color = color.replace("log_", "")
+    if highlight == "true":
+        highlight_nbhds = pd.DataFrame(
+            df.sort_values(by=color, ascending=False).head(3)["neighborhood"]
+        )
+    elif highlight:
+        highlight_nbhds = pd.DataFrame(
+            df[df["neighborhood"].isin(highlight)].drop(columns=["geometry"])
+        )
+    else:
+        return
+
+    if highlight:
+        h = gpd.GeoDataFrame(highlight_nbhds.merge(nbhd_df, on="neighborhood"))
+        h = h.set_geometry("geometry")
+        h = h.set_crs(epsg=4326)
+
+        h.plot(ax=ax, facecolor="none", edgecolor="black", linewidth=1.75)
+
+        # Add nums in highlighted areas and store geometry
+        legend_data = {}
+        count = 1
+        for i, row in h.iterrows():
+            ax.annotate(
+                text=str(count),
+                xy=(row["geometry"].centroid.x, row["geometry"].centroid.y),
+                horizontalalignment="center",
+                verticalalignment="center",
+                bbox=dict(
+                    boxstyle="circle,pad=0.0", facecolor="white", edgecolor="none"
+                ),
+            )
+            # legend_data.append((count, row["neighborhood"], row["geometry"]))
+            legend_data.update({count: row["neighborhood"]})
+            count += 1
+
+        # Add custom annotations for neighborhoods
+        y_offset = 0.05
+        if legend:
+            ax.annotate(
+                text=legend,
+                xy=(0.5, -0.05),
+                xycoords="axes fraction",
+                fontsize=12,
+                fontweight="bold",
+                ha="center",
+            )
+        for i, name in legend_data.items():
+            x = 0.5
+            y = -0.05 - (y_offset * i)
+            ax.annotate(
+                text=",".join(f"{i}: {name}".split(",")[:2])
+                + f" ({round(float(df[df['neighborhood'] == name][color]), 3):,})",
+                xy=(x, y),
+                xycoords="axes fraction",
+                fontsize=12,
+                ha="center",
+            )
