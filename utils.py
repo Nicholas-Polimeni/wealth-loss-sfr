@@ -205,7 +205,7 @@ def map(
 
         def log_tick_formatter(val, pos=None):
             if color == "total_loss_adj":
-                return str(f"{round((round(np.exp(val), 3) / 1000000), 3)}M")
+                return str(f"{round((round(np.exp(val), 3) / 1000000), 2)}M")
             else:
                 return str(round(np.exp(val), 3))
 
@@ -215,7 +215,7 @@ def map(
     else:
         cbar = ax.get_figure().colorbar(ax.collections[0], ax=ax, shrink=0.8)
 
-    if format_func:
+    if format_func and not log:
         cbar.ax.yaxis.set_major_formatter(ticker.FuncFormatter(format_func))
 
     color = color.replace("log_", "")
@@ -260,9 +260,12 @@ def map(
         for i, name in legend_data.items():
             x = 0.5
             y = -0.05 - (y_offset * i)
+            if format_func:
+                val = format_func(float(df[df["neighborhood"] == name][color]), 0)
+            else:
+                val = round(float(df[df["neighborhood"] == name][color]), 3)
             ax.annotate(
-                text=",".join(f"{i}: {name}".split(",")[:2])
-                + f" ({round(float(df[df['neighborhood'] == name][color]), 3):,})",
+                text=",".join(f"{i}: {name}".split(",")[:2]) + f" ({val})",
                 xy=(x, y),
                 xycoords="axes fraction",
                 fontsize=12,
